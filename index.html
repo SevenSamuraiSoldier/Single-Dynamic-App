@@ -1091,7 +1091,7 @@
             //////////////////////////////////////////////////////////////////////////////////////
 
             /* const keywordForFavorites = "fav"; */
-            const versionNumber = 5.9;
+            const versionNumber = 6.1;
             const versionFlashTime = 1000; // in ms (1000 ms = 1 sec)
 
             // console.log("Collection Name: " + collectionName);
@@ -1588,6 +1588,23 @@
                 }
             }
 
+            // Helper Fn to join the multi word string 'str' with a 'seperator' (- or _).
+            function slugify(separator, str) {
+                if (separator !== "-" && separator !== "_") {
+                    throw new Error('Separator must be "-" or "_"');
+                }
+
+                return str.trim().replace(/\s+/g, separator);
+            }
+
+            function clearCustomFormFields() {
+                const customGroups = wishlistForm.querySelectorAll('#custom-select-group');
+                customGroups.forEach((group, index) => {
+                    group.remove();
+                    console.log(`Group ${index} Deleted!`);
+                });
+            }
+
             /////////////////////////////////////////////////////////////////////
 
             function initApp() {
@@ -1632,6 +1649,7 @@
                 modalTitle.textContent = "Add New Entry";
                 // wishlistForm.reset();
                 resetWishlistForm();
+                clearCustomFormFields();
                 docIdInput.value = "";
                 showModal(addEditModal);
             });
@@ -1961,7 +1979,11 @@
                         </div>\n`;
                     }
                 });
-                modalFormInnerHTML += `   <div class="modal-buttons">
+                modalFormInnerHTML += `   <div class="custom-field-button-div">
+                    <button type="button" id="addCustomFieldBtn" class="btn-cancel">+ Add Custom Field</button>
+                </div>\n`;
+
+                modalFormInnerHTML += `   <div class="modal-buttons" id='modal-buttons'>
                     <button type="button" id="cancelAddEditBtn" class="btn-cancel">Cancel</button>
                     <button type="submit" class="btn-save">Save</button>
                 </div>`;
@@ -1971,6 +1993,7 @@
                 // Cancel Add/Edit
                 const cancelAddEditBtn = document.getElementById("cancelAddEditBtn");
                 cancelAddEditBtn.addEventListener("click", () => {
+                    clearCustomFormFields();
                     hideModal(addEditModal);
                     // Clearing the Editing Photo data
                     for (const key of Object.keys(dataMap)) {
@@ -1980,6 +2003,113 @@
                     }
                     // console.log(editingPhotoOGBase64); //For Debugging
                 });
+
+
+
+                const addCustomFieldBtn = document.getElementById("addCustomFieldBtn");
+                addCustomFieldBtn.addEventListener("click", () => {
+                    const customFieldGroup = document.createElement("div");
+                    customFieldGroup.classList.add('form-group');
+                    customFieldGroup.id = 'custom-select-group';
+                    let customFieldSelectInnerHTML = `
+                            <label for="customSelect">Select Type of Data</label>
+                            <select id="customSelect" }>
+                                <option value="" disabled selected hidden>-- Select an option --</option>
+                                <option value="input">Input Text</option>
+                                <option value="link">Link</option>
+                                <option value="dropText">Drop Text</option>
+                                <option value="photo">Photo</option>
+                            </select>\n`;
+                    customFieldGroup.innerHTML = customFieldSelectInnerHTML;
+
+                    const customFieldButtonDiv = event.target.closest(".custom-field-button-div");
+            
+                    customFieldButtonDiv.before(customFieldGroup);
+                    const customSelect = customFieldGroup.querySelector('#customSelect');
+                    customSelect.addEventListener('change', set_Custom_Field_Props);
+                    
+                });
+            }
+
+            function set_Custom_Field_Props(event) {
+                const selectedValue = event.target.value;
+                let customFieldGroup = event.target.parentElement;
+                // console.log(customFieldGroup);
+                if (selectedValue === 'input') {
+                    const label = document.createElement('label');
+                    label.textContent = 'Edit';
+                    label.contentEditable = 'true';
+
+                    // console.log(selectedValue); // For Debugging
+                    const inputElement = document.createElement('input');
+                    inputElement.type = 'text'; // 'text', 'checkbox', 'number', 'email', etc.
+                    inputElement.id = 'custom-field-value';
+                    inputElement.classList.add('custom-field-value');
+                    inputElement.placeholder = 'Enter value...';
+                    inputElement.dataset.dataType = 'input'; // IMP for identifying the type for display
+
+                    customFieldGroup.innerHTML = "";
+
+                    customFieldGroup.appendChild(label);
+                    customFieldGroup.appendChild(inputElement);
+
+                }else if (selectedValue === 'link') {
+                    const label = document.createElement('label');
+                    label.textContent = 'Edit';
+                    label.contentEditable = 'true';
+
+                    // console.log(selectedValue); // For Debugging
+                    const linkElement = document.createElement('input');
+                    linkElement.type = 'url'; // 'text', 'checkbox', 'number', 'email', etc.
+                    linkElement.id = 'custom-field-value';
+                    linkElement.classList.add('custom-field-value');
+                    linkElement.placeholder = 'Enter Website Link...';
+                    linkElement.dataset.dataType = 'link'; // IMP for identifying the type for display
+
+                    customFieldGroup.innerHTML = "";
+
+                    customFieldGroup.appendChild(label);
+                    customFieldGroup.appendChild(linkElement);
+
+                }else if (selectedValue === 'dropText') {
+                    // console.log(selectedValue); // For Debugging
+                    const label = document.createElement('label');
+                    label.textContent = 'Edit';
+                    label.contentEditable = 'true';
+
+                    // console.log(selectedValue); // For Debugging
+                    const textAreaElement = document.createElement('textarea');
+                    textAreaElement.id = 'custom-field-value';
+                    textAreaElement.classList.add('custom-field-value');
+                    textAreaElement.rows = 5;
+                    textAreaElement.cols = 50;
+                    textAreaElement.placeholder = 'Enter value...';
+                    textAreaElement.dataset.dataType = 'dropText'; // IMP for identifying the type for display
+
+                    customFieldGroup.innerHTML = "";
+
+                    customFieldGroup.appendChild(label);
+                    customFieldGroup.appendChild(textAreaElement);
+                }else if (selectedValue === 'photo') {
+                    const label = document.createElement('label');
+                    label.textContent = 'Edit';
+                    label.contentEditable = 'true';
+
+                    const photoSelectorElement = document.createElement('input');
+                    photoSelectorElement.type = 'file'; // 'text', 'checkbox', 'number', 'email', etc.
+                    photoSelectorElement.id = 'custom-field-value';
+                    photoSelectorElement.classList.add('custom-field-value');
+                    photoSelectorElement.dataset.dataType = 'photo'; // IMP for identifying the type for display
+                    photoSelectorElement.accept = "image/png,image/jpeg,image/webp";
+
+                    customFieldGroup.innerHTML = "";
+
+                    customFieldGroup.appendChild(label);
+                    customFieldGroup.appendChild(photoSelectorElement);
+
+                }else {
+
+                }
             }
 
             function dynamicallyRenderCards(data, doc, dataMap) {
@@ -1996,7 +2126,7 @@
                     `;
                 }
 
-                // Buttons and links
+                // link Buttons & Photos
                 Object.keys(dataMap).forEach((key) => {
                     const config = dataMap[key];
                     if (config.type === "link" && data[key]) {
@@ -2025,17 +2155,28 @@
                     }
                 });
 
-                const isFavorite = data.fav === "Fav.";
-                // Edit/delete buttons (always present)
-                cardButtons += `
-                    <button class="action-button edit-button" data-id="${doc.id}">${editBtnSvg}</button>
-                    <button class="action-button delete-button" data-id="${doc.id}">${deleteBtnSvg}</button>
-                    <button class="action-button fav-button" data-id="${doc.id}" data-fav="${data.fav || ""}" style="fill: ${isFavorite ? "red" : "#5b5b5b"};">
-                        <svg width="24px" height="24px" viewBox="0 0 16 16" fill="none">
-                            <path d="M1.24 8.24L8 15l6.76-6.76C15.55 7.45 16 6.37 16 5.24V5.05C16 2.81 14.18 1 11.95 1c-1.23 0-2.39.56-3.17 1.52L8 3.5l-.78-.98C6.45 1.56 5.28 1 4.05 1 1.81 1 0 2.81 0 5.05v.19c0 1.13.45 2.2 1.24 3z" fill="${isFavorite ? "red" : "#5b5b5b"}"/>
-                        </svg>
-                    </button>
-                `;
+                // Adding Custom PHOTO Entries to the Card: Added in v_6.1
+                if (data && data.customData) {
+                    Object.entries(data.customData).forEach(([key, item]) => {
+                        if (item.type === 'photo' && item.customValue != "") {
+                            const rawValue = item.customValue;
+                            const label = item.label.trim();
+                            const type = item.type.trim();
+
+                            const img = new Image();
+                            img.src = rawValue;
+                            if (img.naturalWidth < img.naturalHeight) {
+                                /* cardDetails += `
+                                <img src="${data[key]}" style="height: ${config.height}px;">`; */
+                                cardDetails += `
+                                <img src="${rawValue}" style="width: ${300}px;">`;
+                            } else {
+                                cardDetails += `
+                                <img src="${rawValue}" style="width: ${300}px;">`;
+                            }
+                        }
+                    });
+                }
 
                 // Details
                 Object.keys(dataMap).forEach((key) => {
@@ -2081,6 +2222,64 @@
                         `;
                     }
                 });
+
+                // Adding Custom Data Entries to the Card: Added in v_6.0
+                if (data && data.customData) {
+                    Object.entries(data.customData).forEach(([key, item]) => {
+                        const rawValue = item.customValue.trim();
+                        const label = item.label.trim();
+                        const type = item.type.trim();
+                        // console.log("Key Name:", key);
+                        // console.log("Value:", rawValue);
+                        // console.log("Label:",label);
+                        // console.log("Type:", type);
+
+                        if (type === 'input' && rawValue != "") {
+                            let line = "";
+                            if (item.styling && item.styling === "strong") {
+                                line = `<p class="card-detail"><strong>${label}: &nbsp;</strong> <span class="highlight-green card-values" id="${key}">${rawValue}</span></p>`;
+                                //console.log("this block"); // For Debugging
+                            } else {
+                                line = `<p class="card-detail"><strong>${label}:  &nbsp;</strong><span class="card-values" id="${key}">${rawValue}</span></p>`;
+                            }
+                            cardDetails += line;
+                        }else if (type === 'link' && rawValue != "") {
+                            const rawValue = item.customValue.trim();
+                            const label = item.label.trim();
+                            const type = item.type.trim();
+
+                            // Extract main domain from URL
+                            const mainDomain = extractMainDomain(rawValue);
+                            // You can customize SVG/icon as needed per type/link
+                            cardButtons += `<a href="${rawValue}" target="_blank" class="action-button" title="${mainDomain}">${mapLinkSvg}</a>`;
+
+                        }else if (type === 'dropText' && rawValue != "") {
+                            const rawValue = item.customValue.trim();
+                            const label = item.label.trim();
+                            const type = item.type.trim();
+                            cardDetails += `
+                            <div class="card-detail">
+                                <details>
+                                    <summary>${label}</summary>
+                                    <p  id="${key}">${rawValue}</p>
+                                </details>
+                            </div>
+                            `;
+                        }
+                    
+                    });
+                }
+                const isFavorite = data.fav === "Fav.";
+                // Edit/delete buttons (always present)
+                cardButtons += `
+                    <button class="action-button edit-button" data-id="${doc.id}">${editBtnSvg}</button>
+                    <button class="action-button delete-button" data-id="${doc.id}">${deleteBtnSvg}</button>
+                    <button class="action-button fav-button" data-id="${doc.id}" data-fav="${data.fav || ""}" style="fill: ${isFavorite ? "red" : "#5b5b5b"};">
+                        <svg width="24px" height="24px" viewBox="0 0 16 16" fill="none">
+                            <path d="M1.24 8.24L8 15l6.76-6.76C15.55 7.45 16 6.37 16 5.24V5.05C16 2.81 14.18 1 11.95 1c-1.23 0-2.39.56-3.17 1.52L8 3.5l-.78-.98C6.45 1.56 5.28 1 4.05 1 1.81 1 0 2.81 0 5.05v.19c0 1.13.45 2.2 1.24 3z" fill="${isFavorite ? "red" : "#5b5b5b"}"/>
+                        </svg>
+                    </button>
+                `;
 
                 // Build card HTML
                 return `
@@ -2279,12 +2478,6 @@
                                         //console.log("photo data");
                                         return;
                                     } else {
-                                        // document.getElementById(`${key}`).value = data[key] || ''; // Old Code v_2.6
-
-                                        //Removed in v_3.7
-                                        // wishlistForm.querySelector(`#${key}`).value = data[key] || '';
-
-                                        //Added in v_3.7
                                         const element = wishlistForm.querySelector(`#${key}`);
                                         if (element) {
                                             element.value = data[key] || "";
@@ -2293,6 +2486,103 @@
                                         }
                                     }
                                 });
+                                
+                                if (data && data.customData) {
+                                    Object.entries(data.customData).forEach(([key, item]) => {
+                                        const rawValue = item.customValue.trim();
+                                        const labelValue = item.label.trim();
+                                        const type = item.type.trim();
+                                        /* console.log("Key Name:", key);
+                                        console.log("Value:", rawValue);
+                                        console.log("Label:",label);
+                                        console.log("Type:", type); */
+                                        if (type === "photo") {
+                                            editingPhotoOGBase64[key] = item.customValue;
+
+                                            const label = document.createElement('label');
+                                            label.textContent = labelValue;
+
+                                            const photoSelectorElement = document.createElement('input');
+                                            photoSelectorElement.type = 'file'; 
+                                            photoSelectorElement.id = 'custom-field-value';
+                                            photoSelectorElement.classList.add('custom-field-value');
+                                            photoSelectorElement.dataset.dataType = 'photo';
+                                            photoSelectorElement.accept = "image/png,image/jpeg,image/webp";
+
+                                            const formGroupDiv = document.createElement('div');
+                                            formGroupDiv.classList.add('form-group');
+                                            formGroupDiv.id = 'custom-select-group';
+
+                                            const targetDiv = wishlistForm.querySelector('.custom-field-button-div');
+
+                                            if (targetDiv) {
+                                                targetDiv.parentNode.insertBefore(formGroupDiv, targetDiv);
+                                                formGroupDiv.appendChild(label);
+                                                formGroupDiv.appendChild(photoSelectorElement);
+                                            }else {
+                                                console.error(`Error`);
+                                            }
+
+                                            return;
+
+                                        }else if (type === "input" || type === 'link') {
+                                            const element = wishlistForm.querySelector(`#${key}`);
+                                            const label = document.createElement('label');
+                                            label.textContent = labelValue;
+                                            // label.contentEditable = 'true';
+
+                                            const inputElement = document.createElement('input');
+                                            inputElement.type =  'input';
+                                            inputElement.id = 'custom-field-value';
+                                            inputElement.classList.add('custom-field-value');
+                                            inputElement.dataset.dataType = type;
+                                            inputElement.value = rawValue;
+
+                                            const formGroupDiv = document.createElement('div');
+                                            formGroupDiv.classList.add('form-group');
+                                            formGroupDiv.id = 'custom-select-group';
+
+                                            const targetDiv = wishlistForm.querySelector('.custom-field-button-div');
+
+                                            if (targetDiv) {
+                                                targetDiv.parentNode.insertBefore(formGroupDiv, targetDiv);
+                                                formGroupDiv.appendChild(label);
+                                                formGroupDiv.appendChild(inputElement);
+                                            }else {
+                                                console.error(`Error`);
+                                            }
+                                        }else if (type === 'dropText') {
+                                            const element = wishlistForm.querySelector(`#${key}`);
+                                            const label = document.createElement('label');
+                                            label.textContent = labelValue;
+                                            // label.contentEditable = 'true';
+
+                                            const textAreaElement = document.createElement('textarea');
+                                            textAreaElement.id = 'custom-field-value';
+                                            textAreaElement.classList.add('custom-field-value');
+                                            textAreaElement.rows = 5;
+                                            textAreaElement.cols = 50;
+                                            textAreaElement.dataset.dataType = type; 
+                                            textAreaElement.value = rawValue;
+
+                                            const formGroupDiv = document.createElement('div');
+                                            formGroupDiv.classList.add('form-group');
+                                            formGroupDiv.id = 'custom-select-group';
+
+                                            const targetDiv = wishlistForm.querySelector('.custom-field-button-div');
+
+                                            if (targetDiv) {
+                                                targetDiv.parentNode.insertBefore(formGroupDiv, targetDiv);
+                                                formGroupDiv.appendChild(label);
+                                                formGroupDiv.appendChild(textAreaElement);
+                                            }else {
+                                                console.error(`Error`);
+                                            }
+                                        }
+                                    });
+                                }
+                                
+                                
                                 modalTitle.textContent = "Edit Entry";
                                 showModal(addEditModal);
                             }
@@ -2420,6 +2710,65 @@
                         data[key] = null;
                     }
                 }
+                const inputs = wishlistForm.querySelectorAll('.custom-field-value');
+
+                for (const input of inputs) {
+                    const label = input.parentElement.querySelector('label');
+                    const labelText = label ? label.textContent.trim() : '';
+                    let customValue = input ? input.value.trim() : '';
+                    
+                    if (!labelText) {
+                        event.preventDefault();
+                        console.warn('Form submission aborted due to invalid label text:', labelText);
+                        alert(`Form submission aborted due to invalid label text: ${labelText}`);
+                        return; // Instantly breaks the loop and exits the submit handler
+                    }
+                    /* if (!customValue) {
+                        event.preventDefault();
+                        console.warn('Form submission aborted due to invalid Input text:', customValue);
+                        alert(`Form submission aborted due to invalid Input text: ${customValue}`);
+                        return; // Instantly breaks the loop and exits the submit handler
+                    } */
+
+                    let customKey = slugify("_", labelText);
+
+                    let newPhotoBase64 = '';
+                    // For Photo Data
+                    if (input.type === 'file'){
+                        console.log("Photo FIle");
+                        
+                        if (input && input.files && input.files.length > 0) {
+                            // console.log('inside if block 1'); // For Debugging
+                            const photoFile = input.files[0];
+                            // console.log(photoFile); // For Debugging
+
+                            const heightLimit = 300;
+                            const photoBase64 = await fileToBase64(photoFile, heightLimit);
+                            customValue = photoBase64;
+
+                            // let uID = generateUniqueIDFromText(data[key]); // For Debugging
+                            // console.log(`submit: input file block data[key] uID: ${uID}`); // For Debugging
+
+                        }else {
+                            // console.log('inside else block 2'); // For Debugging
+                            customValue = editingPhotoOGBase64[customKey] || '';
+                        }
+                    }
+
+                    // Initialize customData if it doesn't exist yet
+                    if (!data.customData) {
+                        data.customData = {};
+                    }
+
+                    data.customData[customKey] = {
+                        label: labelText,
+                        type: input.dataset.dataType,
+                        customValue: customValue
+                    };
+                    
+                }
+                console.log(data); // For Debugging
+
                 // Add timestamp as the last key
                 data.timestamp = Date.now();
                 // console.log(data); // For Debugging
@@ -2440,6 +2789,8 @@
                         //visibleEntriesCount ++;
                         updateCountText();
                     }
+
+                    clearCustomFormFields();
                     hideModal(addEditModal);
                 } catch (error) {
                     console.error("Error saving document: ", error);
@@ -2539,6 +2890,7 @@
                     };
                 });
             }
+        
         </script>
     </body>
 </html>
