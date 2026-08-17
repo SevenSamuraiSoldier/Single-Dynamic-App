@@ -1601,7 +1601,7 @@
                 const customGroups = wishlistForm.querySelectorAll('#custom-select-group');
                 customGroups.forEach((group, index) => {
                     group.remove();
-                    console.log(`Group ${index} Deleted!`);
+                    // console.log(`Group ${index} Deleted!`); // For Debugging
                 });
             }
 
@@ -1742,65 +1742,6 @@
             }
             ///////////////------------------------------------------------------------------
 
-            /* // Old Code v_4.4 ----Search bar input Event Listener -- 
-            searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value;
-                renderDocs(searchTerm);
-            }); */
-
-            // Old Code v_5.3 ---- for new dataMap entries, it was creating error for menuOptions
-            /* async function populateMenuOptions() {
-                try {
-                    const docRef = db.collection(collectionName).doc("menuOptions");
-                    const docSnap = await docRef.get();
-                    //console.log(docSnap);  // For Debugging
-                    let menuOptions = {};
-
-                    if (!docSnap.exists) {
-                        menuOptions = buildMenuOptions(dataMap);
-                        // console.log(menuOptions);  // For Debugging
-                        console.log("No menuOptions document found. Creating From dataMap values.");
-                        await docRef.set(menuOptions);
-                    } else {
-                        console.log("FireStore Menu Options Already Exist....");
-                        menuOptions = docSnap.data();
-                        // console.log(menuOptions);  // For Debugging
-                    }
-
-                    for (const key in dataMap) {
-                        if (dataMap[key].type === "datalist") {
-                            //console.log("DataList type detected for: " + key);  // For Debugging
-                            const elementId = key;
-                            const element = document.getElementById(`${elementId}List`);
-                            // console.log(element.previousElementSibling);  // For Debugging
-                            if (element) {
-                                // Clear all existing <option> elements
-                                element.replaceChildren();
-                                // Split the string and create new options
-                                const options = menuOptions[key]
-                                    .split(",")
-                                    .map((s) => s.trim())
-                                    .filter((s) => s.length > 0);
-                                options.forEach((optionText) => {
-                                    const option = document.createElement("option");
-                                    option.value = optionText;
-                                    option.textContent = optionText;
-                                    element.appendChild(option);
-                                    // console.log(option);  // For Debugging
-                                });
-                            } else {
-                                //console.log("element with id: " + key+" Doesnt exist!!");  // For Debugging
-                            }
-                        } else {
-                            //console.log("datalist Not detected!");  // For Debugging
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error populating menu options:", error);
-                    showInfoModal("Error loading menu options. Please try again.");
-                }
-            } */
-
             // Function to populate datalist elements from a Firestore document
             async function populateMenuOptions() {
                 try {
@@ -1810,7 +1751,7 @@
 
                     if (!docSnap.exists) {
                         menuOptions = buildMenuOptions(dataMap);
-                        console.log("No menuOptions document found. Creating from dataMap values.");
+                        console.log("No menuOptions Document Found. Creating From dataMap Object...");
                         await docRef.set(menuOptions);
                     } else {
                         console.log("Firestore Menu Options Already Exist....");
@@ -2148,9 +2089,9 @@
                                 <img src="${data[key]}" style="width: ${config.height}px;">`;
                             }
                         } else if (config.mode === "download") {
-                            console.log("Add Logic For Download here...");
+                            // console.log("Add Logic For Download here...");
                         } else {
-                            console.log("photo mode value is invalid!");
+                            // console.log("photo mode value is invalid!");
                         }
                     }
                 });
@@ -2394,7 +2335,7 @@
                     noDataMessage.style.display = "block";
                     noDataMessage.textContent = "No matching entries found.";
                 } else if (sortBy !== "timestamp") {
-                    console.log(`Sorting as per: ${sortBy}`);
+                    // console.log(`Sorting as per: ${sortBy}`); // For Debugging
                     noDataMessage.style.display = "none";
                     filteredDocs.forEach((doc) => {
                         const card = createCard(doc);
@@ -2403,7 +2344,7 @@
                         visibleEntriesCount++;
                     });
                 } else {
-                    console.log(`Sorting as per: ${sortBy}`);
+                    // console.log(`Sorting as per: ${sortBy}`); // For Debugging
                     noDataMessage.style.display = "none";
                     // const startTime = performance.now();
                     let searchTerm = query.toLowerCase();
@@ -2456,7 +2397,7 @@
 
                 if (editBtn) {
                     const docId = editBtn.dataset.id;
-                    console.log(docId); // For Debugging
+                    console.info('Doc To Be Edited:\nID:' + docId); // For Debugging
                     db.collection(collectionName)
                         .doc(docId)
                         .get()
@@ -2470,8 +2411,8 @@
                                     if (dataMap[key].type === "photo") {
                                         editingPhotoOGBase64[key] = data[key];
 
-                                        const uID = generateUniqueIDFromText(editingPhotoOGBase64[key]); // For Debugging
-                                        console.log(`Editing phot0 uid: ${uID}`); // For Debugging
+                                        // const uID = generateUniqueIDFromText(editingPhotoOGBase64[key]); // For Debugging
+                                        // console.log(`Editing phot0 uid: ${uID}`); // For Debugging
 
                                         //console.log(key); // For Debugging
                                         // console.log(editingPhotoOGBase64[key]); // For Debugging
@@ -2482,7 +2423,7 @@
                                         if (element) {
                                             element.value = data[key] || "";
                                         } else {
-                                            console.warn(`Element with ID '${key}' not found in form`);
+                                            console.error(`Element with ID '${key}' not found in form`);
                                         }
                                     }
                                 });
@@ -2526,7 +2467,6 @@
                                             return;
 
                                         }else if (type === "input" || type === 'link') {
-                                            const element = wishlistForm.querySelector(`#${key}`);
                                             const label = document.createElement('label');
                                             label.textContent = labelValue;
                                             // label.contentEditable = 'true';
@@ -2552,7 +2492,6 @@
                                                 console.error(`Error`);
                                             }
                                         }else if (type === 'dropText') {
-                                            const element = wishlistForm.querySelector(`#${key}`);
                                             const label = document.createElement('label');
                                             label.textContent = labelValue;
                                             // label.contentEditable = 'true';
@@ -2596,7 +2535,7 @@
 
                 if (deleteBtn) {
                     const docId = deleteBtn.dataset.id;
-                    console.log(docId); // For Debugging
+                    console.warn('Doc To Be Deleted:\nID: ' + docId); // For Debugging
                     // deleteBtn.blur(); //Added in v_5.1
                     hideModal(addEditModal);
                     showModal(deleteModal);
@@ -2608,12 +2547,12 @@
                 Object.keys(dataMap).forEach((key) => {
                     const element = wishlistForm.querySelector(`#${key}`);
                     if (dataMap[key].persistValue === true) {
-                        console.log(`persistant value true for key: ${key}`);
+                        // console.log(`persistant value true for key: ${key}`); // For Debugging
                     } else {
                         if (element) {
                             element.value = "";
                         } else {
-                            console.warn(`Element with ID '${key}' not found in form`);
+                            console.error(`Element with ID '${key}' not found in form`);
                         }
                     }
                 });
@@ -2677,8 +2616,8 @@
                                 // console.log("photoBase64: " + photoBase64); // For Debugging
                                 data[key] = photoBase64;
 
-                                let uID = generateUniqueIDFromText(data[key]); // For Debugging
-                                console.log(`submit: input file block data[key] uID: ${uID}`); // For Debugging
+                                /* let uID = generateUniqueIDFromText(data[key]); // For Debugging
+                                console.log(`submit: input file block data[key] uID: ${uID}`); // For Debugging */
 
                                 // console.log("[key]: " + key); // For Debugging
                                 // console.log("data[key]: " + data[key]); // For Debugging
@@ -2689,8 +2628,8 @@
                                 // console.log(`input file data: ${input.value}`); // For Debugging
                             } else {
                                 // console.log("photoFile is EMPTY");
-                                let uID = generateUniqueIDFromText(data[key]);
-                                console.log(`submit: input Else BLock data[key] uID: ${uID}`); // For Debugging
+                                /* let uID = generateUniqueIDFromText(data[key]);
+                                console.log(`submit: input Else BLock data[key] uID: ${uID}`); // For Debugging */
                                 // data[key] = editingPhotoOGBase64[key]; //This code is not needed
                                 if (typeof data[key] === "undefined") {
                                     data[key] = "";
@@ -2710,6 +2649,7 @@
                         data[key] = null;
                     }
                 }
+
                 const inputs = wishlistForm.querySelectorAll('.custom-field-value');
 
                 for (const input of inputs) {
@@ -2735,7 +2675,7 @@
                     let newPhotoBase64 = '';
                     // For Photo Data
                     if (input.type === 'file'){
-                        console.log("Photo FIle");
+                        // console.log("Photo FIle"); // For Debugging
                         
                         if (input && input.files && input.files.length > 0) {
                             // console.log('inside if block 1'); // For Debugging
@@ -2767,7 +2707,7 @@
                     };
                     
                 }
-                console.log(data); // For Debugging
+                // console.log(data); // For Debugging
 
                 // Add timestamp as the last key
                 data.timestamp = Date.now();
