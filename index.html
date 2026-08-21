@@ -1180,7 +1180,7 @@
             //////////////////////////////////////////////////////////////////////////////////////
 
             /* const keywordForFavorites = "fav"; */
-            const versionNumber = 6.2;
+            const versionNumber = 6.3;
             const versionFlashTime = 1000; // in ms (1000 ms = 1 sec)
 
             // console.log("Collection Name: " + collectionName);
@@ -2215,6 +2215,7 @@
                 deleteBtn.addEventListener("click", deleteCustomField);
             }
 
+            // Added in v_6.2 ---------------------------------------------
             function deleteCustomField(event) {
                 // event.stopPropagation();
                 // const deleteBtn = event.target;
@@ -2445,6 +2446,21 @@
                         }
                     }
                 });
+
+                // Added in v_6.3 ---------------------------------------------
+                if (data && data.customData) {
+                    Object.entries(data.customData).forEach(([key, item]) => {
+                        const type = item.type.trim();
+                        if (type === "photo"|| type === "link") {
+                            return;
+                        }else if (type === "input"|| type === "dropText") {
+                            const safeKey = CSS.escape(key);
+                            const clickElement = card?.querySelector(`#${safeKey}`);
+                            // const clickElement = card.querySelector(`#${key}`);
+                            addCopyClick(clickElement);
+                        }
+                    });
+                }
                 return card;
             }
 
@@ -2507,6 +2523,18 @@
                                 searchableText += ` ${data[key] || ""}`;
                             }
                         });
+
+                        // Added in v_6.3 ---------------------------------------------
+                        if (data && data.customData) {
+                            Object.entries(data.customData).forEach(([key, item]) => {
+                                const type = item.type.trim();
+                                if (type === "photo"|| type === "link") {
+                                    return;
+                                }else if (type === "input"|| type === "dropText") {
+                                    searchableText += ` ${item.customValue.trim() || ""}`;
+                                }
+                            });
+                        }
 
                         return regex.test(searchableText);
                     });
