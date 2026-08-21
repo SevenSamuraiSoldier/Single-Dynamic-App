@@ -129,12 +129,24 @@
                 .action-button:focus-visible {
                     background: color-mix(in srgb, var(--bg-main), rgb(255, 255, 255) 30%);
                 }
+                .customFieldDeleteBtn:focus-visible {
+                    /* background: color-mix(in srgb, var(--bg-card), rgb(255, 255, 255) 20%); */
+                    /* background: var(--bg-card); */
+                    scale: 1.3;
+                    opacity: 70%;
+                }
             }
 
             /* This ensures hover styles only apply on devices that actually have a mouse */
             @media (orientation: landscape) {
                 .action-button:hover {
                     background: color-mix(in srgb, var(--bg-main), rgb(255, 255, 255) 30%);
+                }
+                .customFieldDeleteBtn:hover {
+                    background: color-mix(in srgb, var(--bg-card), rgb(255, 255, 255) 20%);
+                    /* background: var(--bg-card); */
+                    scale: 1.3;
+                    opacity: 70%;
                 }
             }
 
@@ -396,6 +408,10 @@
 
             .form-group {
                 margin-bottom: 1rem;
+                display: flex;
+                justify-content: center;
+                flex-direction: column;
+                align-items: center;
             }
 
             .form-group label {
@@ -594,6 +610,9 @@
                 /* .card img {
                     max-width: 300px;
                 } */
+                .custom-field-wrapper {
+                    width: 50% !important;
+                }
             }
             .master-div {
                 margin: 0;
@@ -800,7 +819,7 @@
             html.readonly .add-button,
             html.readonly .edit-button,
             html.readonly .delete-button,
-            html.readonly #html-console-fab{
+            html.readonly #html-console-fab {
                 display: none !important;
             }
 
@@ -971,6 +990,76 @@
                 fill: var(--text-data-highlighted);
             }
             /* ON SCREEN CONSOLE WINDOW SECTION --------------END-------------------- */
+
+            #addCustomFieldBtn {
+                padding: 0.5rem 1rem;
+                /* font-size: 1.2rem; */
+                font-weight: 500;
+                border-radius: 0.375rem;
+                cursor: pointer;
+                transition: background-color 0.3s ease-in-out;
+            }
+
+            .custom-field-wrapper {
+                position: relative;
+                /* width: 50%; */
+                width: 80%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                align-content: center;
+                /* display: inline-block; */
+                margin: 0;
+                padding-inline: 0;
+                box-sizing: border-box;
+            }
+            .custom-field-wrapper input {
+                width: 100%;
+                margin-inline: 0;
+            }
+            .customFieldDeleteBtn {
+                position: absolute;
+                top: 0;
+                left: 0;
+                /* transform: translate(-50%, -50%); */
+                translate: -50% -50%;
+
+                box-sizing: border-box;
+                /* display: flex; */
+                align-content: center;
+                /* justify-content: center; */
+                align-items: center;
+                background: transparent;
+                border-radius: 50%;
+                width: 35px;
+                height: 35px;
+                /* background: rgba(24, 24, 24, 0.85); */
+                opacity: 35%;
+                -webkit-tap-highlight-color: transparent;
+                /* border: 1px solid #444; */
+                /* backdrop-filter: blur(4px); */
+                border: none;
+                transition: 0.15s ease-out;
+                transform-origin: center;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                align-content: center;
+                flex-wrap: wrap;
+                border-radius: 30%;
+                
+            }
+            /* .customFieldDeleteBtn:hover {
+                scale: 1.3;
+                opacity: 70%;
+            } */
+
+            .customFieldDeleteBtn svg {
+                fill: red;
+                height: 20px;
+                width: 20px;
+            }
         </style>
     </head>
     <body>
@@ -1091,7 +1180,7 @@
             //////////////////////////////////////////////////////////////////////////////////////
 
             /* const keywordForFavorites = "fav"; */
-            const versionNumber = 6.1;
+            const versionNumber = 6.2;
             const versionFlashTime = 1000; // in ms (1000 ms = 1 sec)
 
             // console.log("Collection Name: " + collectionName);
@@ -1118,6 +1207,7 @@
                 <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520Zm-400 0v520-520Z"/>
                 </svg>`;
             const mapLinkSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m256-240-56-56 384-384H240v-80h480v480h-80v-344L256-240Z"></path></svg>`;
+            const customFieldDeleteBtnSVG = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m336-280 144-144 144 144 56-56-144-144 144-144-56-56-144 144-144-144-56 56 144 144-144 144 56 56ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>`;
 
             // Initialize Firebase services
             let app;
@@ -1390,7 +1480,8 @@
                 return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
             }
 
-            async function exportData() {
+            // Old Code --- v_6.1 
+            /* async function exportData() {
                 try {
                     const querySnapshot = await db.collection(collectionName).get();
                     if (querySnapshot.empty) {
@@ -1417,6 +1508,62 @@
                 } catch (error) {
                     console.error("Error exporting data: ", error);
                     showInfoModal("Error exporting data. Please try again.");
+                }
+            }
+             */
+            
+            // New Refactored Error Proof Code Block 
+            async function exportData() {
+                try {
+                    if (typeof db === "undefined" || !collectionName) {
+                        throw new Error("Database or collection name is not defined.");
+                    }
+
+                    const querySnapshot = await db.collection(collectionName).get();
+
+                    // Filter out unwanted documents first
+                    const docsToExport = querySnapshot.docs.filter((doc) => doc.id !== "menuOptions");
+
+                    // Handle empty collection or collection that only contains excluded docs
+                    if (querySnapshot.empty || docsToExport.length === 0) {
+                        showInfoModal("No data to export.");
+                        return;
+                    }
+
+                    const data = {};
+                    docsToExport.forEach((doc) => {
+                        data[doc.id] = doc.data();
+                    });
+
+                    const jsonString = JSON.stringify(data, null, 2);
+                    const blob = new Blob([jsonString], {type: "application/json"});
+                    const url = URL.createObjectURL(blob);
+
+                    // Dynamic and sanitized filename extraction
+                    const titleEl = document.getElementById("app-title");
+                    const rawTitle = titleEl ? titleEl.innerText.trim() : "";
+
+                    // Sanitize string to prevent invalid file name errors; fall back to default if empty
+                    const safeTitle = rawTitle
+                        .replace(/[/\\?%*:|"<>]/g, "")
+                        .replace(/\s+/g, "_")
+                        .toLowerCase();
+                    const fileName = safeTitle ? `${safeTitle}.json` : "export_data.json";
+
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+
+                    // Clean up DOM and memory
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } catch (error) {
+                    console.error("Error exporting data: ", error);
+                    if (typeof showInfoModal === "function") {
+                        showInfoModal("Error exporting data. Please try again.");
+                    }
                 }
             }
 
@@ -1598,7 +1745,7 @@
             }
 
             function clearCustomFormFields() {
-                const customGroups = wishlistForm.querySelectorAll('#custom-select-group');
+                const customGroups = wishlistForm.querySelectorAll("#custom-select-group");
                 customGroups.forEach((group, index) => {
                     group.remove();
                     // console.log(`Group ${index} Deleted!`); // For Debugging
@@ -1945,13 +2092,11 @@
                     // console.log(editingPhotoOGBase64); //For Debugging
                 });
 
-
-
                 const addCustomFieldBtn = document.getElementById("addCustomFieldBtn");
                 addCustomFieldBtn.addEventListener("click", () => {
                     const customFieldGroup = document.createElement("div");
-                    customFieldGroup.classList.add('form-group');
-                    customFieldGroup.id = 'custom-select-group';
+                    customFieldGroup.classList.add("form-group");
+                    customFieldGroup.id = "custom-select-group";
                     let customFieldSelectInnerHTML = `
                             <label for="customSelect">Select Type of Data</label>
                             <select id="customSelect" }>
@@ -1964,92 +2109,131 @@
                     customFieldGroup.innerHTML = customFieldSelectInnerHTML;
 
                     const customFieldButtonDiv = event.target.closest(".custom-field-button-div");
-            
+
                     customFieldButtonDiv.before(customFieldGroup);
-                    const customSelect = customFieldGroup.querySelector('#customSelect');
-                    customSelect.addEventListener('change', set_Custom_Field_Props);
-                    
+                    const customSelect = customFieldGroup.querySelector("#customSelect");
+                    customSelect.addEventListener("change", set_Custom_Field_Props);
                 });
             }
 
             function set_Custom_Field_Props(event) {
                 const selectedValue = event.target.value;
                 let customFieldGroup = event.target.parentElement;
+
+                const container = document.createElement("div");
+                container.classList.add("custom-field-wrapper");
+
+                let deleteBtn = document.createElement("button");
+                deleteBtn.className = "customFieldDeleteBtn";
+                deleteBtn.type = "button";
+                deleteBtn.innerHTML = customFieldDeleteBtnSVG;
                 // console.log(customFieldGroup);
-                if (selectedValue === 'input') {
-                    const label = document.createElement('label');
-                    label.textContent = 'Edit';
-                    label.contentEditable = 'true';
+
+                if (selectedValue === "input") {
+                    const label = document.createElement("label");
+                    label.textContent = "Edit";
+                    label.contentEditable = "true";
 
                     // console.log(selectedValue); // For Debugging
-                    const inputElement = document.createElement('input');
-                    inputElement.type = 'text'; // 'text', 'checkbox', 'number', 'email', etc.
-                    inputElement.id = 'custom-field-value';
-                    inputElement.classList.add('custom-field-value');
-                    inputElement.placeholder = 'Enter value...';
-                    inputElement.dataset.dataType = 'input'; // IMP for identifying the type for display
+                    const inputElement = document.createElement("input");
+                    inputElement.type = "text"; // 'text', 'checkbox', 'number', 'email', etc.
+                    inputElement.id = "custom-field-value";
+                    inputElement.classList.add("custom-field-value");
+                    inputElement.placeholder = "Enter value...";
+                    inputElement.dataset.dataType = "input"; // IMP for identifying the type for display
 
                     customFieldGroup.innerHTML = "";
 
                     customFieldGroup.appendChild(label);
-                    customFieldGroup.appendChild(inputElement);
-
-                }else if (selectedValue === 'link') {
-                    const label = document.createElement('label');
-                    label.textContent = 'Edit';
-                    label.contentEditable = 'true';
+                    customFieldGroup.appendChild(container);
+                    container.appendChild(inputElement);
+                    container.appendChild(deleteBtn);
+                } else if (selectedValue === "link") {
+                    const label = document.createElement("label");
+                    label.textContent = "Edit";
+                    label.contentEditable = "true";
 
                     // console.log(selectedValue); // For Debugging
-                    const linkElement = document.createElement('input');
-                    linkElement.type = 'url'; // 'text', 'checkbox', 'number', 'email', etc.
-                    linkElement.id = 'custom-field-value';
-                    linkElement.classList.add('custom-field-value');
-                    linkElement.placeholder = 'Enter Website Link...';
-                    linkElement.dataset.dataType = 'link'; // IMP for identifying the type for display
+                    const linkElement = document.createElement("input");
+                    linkElement.type = "url"; // 'text', 'checkbox', 'number', 'email', etc.
+                    linkElement.id = "custom-field-value";
+                    linkElement.classList.add("custom-field-value");
+                    linkElement.placeholder = "Enter Website Link...";
+                    linkElement.dataset.dataType = "link"; // IMP for identifying the type for display
 
                     customFieldGroup.innerHTML = "";
 
                     customFieldGroup.appendChild(label);
-                    customFieldGroup.appendChild(linkElement);
-
-                }else if (selectedValue === 'dropText') {
+                    // customFieldGroup.appendChild(linkElement);
+                    customFieldGroup.appendChild(container);
+                    container.appendChild(linkElement);
+                    container.appendChild(deleteBtn);
+                } else if (selectedValue === "dropText") {
                     // console.log(selectedValue); // For Debugging
-                    const label = document.createElement('label');
-                    label.textContent = 'Edit';
-                    label.contentEditable = 'true';
+                    const label = document.createElement("label");
+                    label.textContent = "Edit";
+                    label.contentEditable = "true";
 
                     // console.log(selectedValue); // For Debugging
-                    const textAreaElement = document.createElement('textarea');
-                    textAreaElement.id = 'custom-field-value';
-                    textAreaElement.classList.add('custom-field-value');
+                    const textAreaElement = document.createElement("textarea");
+                    textAreaElement.id = "custom-field-value";
+                    textAreaElement.classList.add("custom-field-value");
                     textAreaElement.rows = 5;
                     textAreaElement.cols = 50;
-                    textAreaElement.placeholder = 'Enter value...';
-                    textAreaElement.dataset.dataType = 'dropText'; // IMP for identifying the type for display
+                    textAreaElement.placeholder = "Enter value...";
+                    textAreaElement.dataset.dataType = "dropText"; // IMP for identifying the type for display
 
                     customFieldGroup.innerHTML = "";
 
                     customFieldGroup.appendChild(label);
-                    customFieldGroup.appendChild(textAreaElement);
-                }else if (selectedValue === 'photo') {
-                    const label = document.createElement('label');
-                    label.textContent = 'Edit';
-                    label.contentEditable = 'true';
+                    // customFieldGroup.appendChild(textAreaElement);
+                    customFieldGroup.appendChild(container);
+                    container.appendChild(textAreaElement);
+                    container.appendChild(deleteBtn);
+                } else if (selectedValue === "photo") {
+                    const label = document.createElement("label");
+                    label.textContent = "Edit";
+                    label.contentEditable = "true";
 
-                    const photoSelectorElement = document.createElement('input');
-                    photoSelectorElement.type = 'file'; // 'text', 'checkbox', 'number', 'email', etc.
-                    photoSelectorElement.id = 'custom-field-value';
-                    photoSelectorElement.classList.add('custom-field-value');
-                    photoSelectorElement.dataset.dataType = 'photo'; // IMP for identifying the type for display
+                    const photoSelectorElement = document.createElement("input");
+                    photoSelectorElement.type = "file"; // 'text', 'checkbox', 'number', 'email', etc.
+                    photoSelectorElement.id = "custom-field-value";
+                    photoSelectorElement.classList.add("custom-field-value");
+                    photoSelectorElement.dataset.dataType = "photo"; // IMP for identifying the type for display
                     photoSelectorElement.accept = "image/png,image/jpeg,image/webp";
 
                     customFieldGroup.innerHTML = "";
 
                     customFieldGroup.appendChild(label);
-                    customFieldGroup.appendChild(photoSelectorElement);
+                    // customFieldGroup.appendChild(photoSelectorElement);
+                    customFieldGroup.appendChild(container);
+                    container.appendChild(photoSelectorElement);
+                    container.appendChild(deleteBtn);
+                } else {
+                }
 
-                }else {
+                deleteBtn.addEventListener("click", deleteCustomField);
+            }
 
+            function deleteCustomField(event) {
+                // event.stopPropagation();
+                // const deleteBtn = event.target;
+                const deleteBtn = event?.target?.closest(".customFieldDeleteBtn");
+                // console.log(deleteBtn); // For Debugging
+                if (!deleteBtn) {
+                    console.error("Delete Button Not Found.");
+                    return;
+                }
+                deleteBtn.blur();
+                const customFieldDiv = deleteBtn.closest("#custom-select-group");
+                // console.log(customFieldDiv); // For Debugging
+                if (!customFieldDiv) {
+                    console.error("Custom Field Container Not Found.");
+                    return;
+                }
+                const result = confirm(`Are You Sure You Want To Delete This Custom Field ?`);
+                if (result) {
+                    customFieldDiv.remove();
                 }
             }
 
@@ -2099,7 +2283,7 @@
                 // Adding Custom PHOTO Entries to the Card: Added in v_6.1
                 if (data && data.customData) {
                     Object.entries(data.customData).forEach(([key, item]) => {
-                        if (item.type === 'photo' && item.customValue != "") {
+                        if (item.type === "photo" && item.customValue != "") {
                             const rawValue = item.customValue;
                             const label = item.label.trim();
                             const type = item.type.trim();
@@ -2175,7 +2359,7 @@
                         // console.log("Label:",label);
                         // console.log("Type:", type);
 
-                        if (type === 'input' && rawValue != "") {
+                        if (type === "input" && rawValue != "") {
                             let line = "";
                             if (item.styling && item.styling === "strong") {
                                 line = `<p class="card-detail"><strong>${label}: &nbsp;</strong> <span class="highlight-green card-values" id="${key}">${rawValue}</span></p>`;
@@ -2184,7 +2368,7 @@
                                 line = `<p class="card-detail"><strong>${label}:  &nbsp;</strong><span class="card-values" id="${key}">${rawValue}</span></p>`;
                             }
                             cardDetails += line;
-                        }else if (type === 'link' && rawValue != "") {
+                        } else if (type === "link" && rawValue != "") {
                             const rawValue = item.customValue.trim();
                             const label = item.label.trim();
                             const type = item.type.trim();
@@ -2193,8 +2377,7 @@
                             const mainDomain = extractMainDomain(rawValue);
                             // You can customize SVG/icon as needed per type/link
                             cardButtons += `<a href="${rawValue}" target="_blank" class="action-button" title="${mainDomain}">${mapLinkSvg}</a>`;
-
-                        }else if (type === 'dropText' && rawValue != "") {
+                        } else if (type === "dropText" && rawValue != "") {
                             const rawValue = item.customValue.trim();
                             const label = item.label.trim();
                             const type = item.type.trim();
@@ -2207,7 +2390,6 @@
                             </div>
                             `;
                         }
-                    
                     });
                 }
                 const isFavorite = data.fav === "Fav.";
@@ -2397,7 +2579,7 @@
 
                 if (editBtn) {
                     const docId = editBtn.dataset.id;
-                    console.info('Doc To Be Edited:\nID:' + docId); // For Debugging
+                    console.info("Doc To Be Edited:\nID:" + docId); // For Debugging
                     db.collection(collectionName)
                         .doc(docId)
                         .get()
@@ -2427,7 +2609,7 @@
                                         }
                                     }
                                 });
-                                
+
                                 if (data && data.customData) {
                                     Object.entries(data.customData).forEach(([key, item]) => {
                                         const rawValue = item.customValue.trim();
@@ -2437,91 +2619,108 @@
                                         console.log("Value:", rawValue);
                                         console.log("Label:",label);
                                         console.log("Type:", type); */
+
+                                        const container = document.createElement("div");
+                                        container.classList.add("custom-field-wrapper");
+
+                                        let deleteFieldBtn = document.createElement("button");
+                                        deleteFieldBtn.className = "customFieldDeleteBtn";
+                                        deleteFieldBtn.type = "button";
+                                        deleteFieldBtn.innerHTML = customFieldDeleteBtnSVG;
+
                                         if (type === "photo") {
                                             editingPhotoOGBase64[key] = item.customValue;
 
-                                            const label = document.createElement('label');
+                                            const label = document.createElement("label");
                                             label.textContent = labelValue;
 
-                                            const photoSelectorElement = document.createElement('input');
-                                            photoSelectorElement.type = 'file'; 
-                                            photoSelectorElement.id = 'custom-field-value';
-                                            photoSelectorElement.classList.add('custom-field-value');
-                                            photoSelectorElement.dataset.dataType = 'photo';
+                                            const photoSelectorElement = document.createElement("input");
+                                            photoSelectorElement.type = "file";
+                                            photoSelectorElement.id = "custom-field-value";
+                                            photoSelectorElement.classList.add("custom-field-value");
+                                            photoSelectorElement.dataset.dataType = "photo";
                                             photoSelectorElement.accept = "image/png,image/jpeg,image/webp";
 
-                                            const formGroupDiv = document.createElement('div');
-                                            formGroupDiv.classList.add('form-group');
-                                            formGroupDiv.id = 'custom-select-group';
+                                            const formGroupDiv = document.createElement("div");
+                                            formGroupDiv.classList.add("form-group");
+                                            formGroupDiv.id = "custom-select-group";
 
-                                            const targetDiv = wishlistForm.querySelector('.custom-field-button-div');
+                                            const targetDiv = wishlistForm.querySelector(".custom-field-button-div");
 
                                             if (targetDiv) {
                                                 targetDiv.parentNode.insertBefore(formGroupDiv, targetDiv);
                                                 formGroupDiv.appendChild(label);
-                                                formGroupDiv.appendChild(photoSelectorElement);
-                                            }else {
+                                                // formGroupDiv.appendChild(photoSelectorElement);
+                                                formGroupDiv.appendChild(container);
+                                                container.appendChild(photoSelectorElement);
+                                                container.appendChild(deleteFieldBtn);
+                                            } else {
                                                 console.error(`Error`);
                                             }
 
-                                            return;
-
-                                        }else if (type === "input" || type === 'link') {
-                                            const label = document.createElement('label');
+                                            // return;
+                                        } else if (type === "input" || type === "link") {
+                                            const label = document.createElement("label");
                                             label.textContent = labelValue;
                                             // label.contentEditable = 'true';
 
-                                            const inputElement = document.createElement('input');
-                                            inputElement.type =  'input';
-                                            inputElement.id = 'custom-field-value';
-                                            inputElement.classList.add('custom-field-value');
+                                            const inputElement = document.createElement("input");
+                                            inputElement.type = "input";
+                                            inputElement.id = "custom-field-value";
+                                            inputElement.classList.add("custom-field-value");
                                             inputElement.dataset.dataType = type;
                                             inputElement.value = rawValue;
 
-                                            const formGroupDiv = document.createElement('div');
-                                            formGroupDiv.classList.add('form-group');
-                                            formGroupDiv.id = 'custom-select-group';
+                                            const formGroupDiv = document.createElement("div");
+                                            formGroupDiv.classList.add("form-group");
+                                            formGroupDiv.id = "custom-select-group";
 
-                                            const targetDiv = wishlistForm.querySelector('.custom-field-button-div');
+                                            const targetDiv = wishlistForm.querySelector(".custom-field-button-div");
 
                                             if (targetDiv) {
                                                 targetDiv.parentNode.insertBefore(formGroupDiv, targetDiv);
                                                 formGroupDiv.appendChild(label);
-                                                formGroupDiv.appendChild(inputElement);
-                                            }else {
+                                                // formGroupDiv.appendChild(inputElement);
+                                                formGroupDiv.appendChild(container);
+                                                container.appendChild(inputElement);
+                                                container.appendChild(deleteFieldBtn);
+                                            } else {
                                                 console.error(`Error`);
                                             }
-                                        }else if (type === 'dropText') {
-                                            const label = document.createElement('label');
+                                        } else if (type === "dropText") {
+                                            const label = document.createElement("label");
                                             label.textContent = labelValue;
                                             // label.contentEditable = 'true';
 
-                                            const textAreaElement = document.createElement('textarea');
-                                            textAreaElement.id = 'custom-field-value';
-                                            textAreaElement.classList.add('custom-field-value');
+                                            const textAreaElement = document.createElement("textarea");
+                                            textAreaElement.id = "custom-field-value";
+                                            textAreaElement.classList.add("custom-field-value");
                                             textAreaElement.rows = 5;
                                             textAreaElement.cols = 50;
-                                            textAreaElement.dataset.dataType = type; 
+                                            textAreaElement.dataset.dataType = type;
                                             textAreaElement.value = rawValue;
 
-                                            const formGroupDiv = document.createElement('div');
-                                            formGroupDiv.classList.add('form-group');
-                                            formGroupDiv.id = 'custom-select-group';
+                                            const formGroupDiv = document.createElement("div");
+                                            formGroupDiv.classList.add("form-group");
+                                            formGroupDiv.id = "custom-select-group";
 
-                                            const targetDiv = wishlistForm.querySelector('.custom-field-button-div');
+                                            const targetDiv = wishlistForm.querySelector(".custom-field-button-div");
 
                                             if (targetDiv) {
                                                 targetDiv.parentNode.insertBefore(formGroupDiv, targetDiv);
                                                 formGroupDiv.appendChild(label);
-                                                formGroupDiv.appendChild(textAreaElement);
-                                            }else {
+                                                // formGroupDiv.appendChild(textAreaElement);
+                                                formGroupDiv.appendChild(container);
+                                                container.appendChild(textAreaElement);
+                                                container.appendChild(deleteFieldBtn);
+                                            } else {
                                                 console.error(`Error`);
                                             }
                                         }
+                                        deleteFieldBtn.addEventListener("click", deleteCustomField);
                                     });
                                 }
-                                
-                                
+
                                 modalTitle.textContent = "Edit Entry";
                                 showModal(addEditModal);
                             }
@@ -2535,7 +2734,7 @@
 
                 if (deleteBtn) {
                     const docId = deleteBtn.dataset.id;
-                    console.warn('Doc To Be Deleted:\nID: ' + docId); // For Debugging
+                    console.warn("Doc To Be Deleted:\nID: " + docId); // For Debugging
                     // deleteBtn.blur(); //Added in v_5.1
                     hideModal(addEditModal);
                     showModal(deleteModal);
@@ -2650,16 +2849,17 @@
                     }
                 }
 
-                const inputs = wishlistForm.querySelectorAll('.custom-field-value');
+                const inputs = wishlistForm.querySelectorAll(".custom-field-value");
 
                 for (const input of inputs) {
-                    const label = input.parentElement.querySelector('label');
-                    const labelText = label ? label.textContent.trim() : '';
-                    let customValue = input ? input.value.trim() : '';
-                    
+                    // const label = input.parentElement.querySelector('label');
+                    const label = input.closest(".form-group")?.querySelector("label");
+                    const labelText = label ? label.textContent.trim() : "";
+                    let customValue = input ? input.value.trim() : "";
+
                     if (!labelText) {
                         event.preventDefault();
-                        console.warn('Form submission aborted due to invalid label text:', labelText);
+                        console.warn("Form submission aborted due to invalid label text:", labelText);
                         alert(`Form submission aborted due to invalid label text: ${labelText}`);
                         return; // Instantly breaks the loop and exits the submit handler
                     }
@@ -2672,11 +2872,11 @@
 
                     let customKey = slugify("_", labelText);
 
-                    let newPhotoBase64 = '';
+                    let newPhotoBase64 = "";
                     // For Photo Data
-                    if (input.type === 'file'){
+                    if (input.type === "file") {
                         // console.log("Photo FIle"); // For Debugging
-                        
+
                         if (input && input.files && input.files.length > 0) {
                             // console.log('inside if block 1'); // For Debugging
                             const photoFile = input.files[0];
@@ -2688,10 +2888,9 @@
 
                             // let uID = generateUniqueIDFromText(data[key]); // For Debugging
                             // console.log(`submit: input file block data[key] uID: ${uID}`); // For Debugging
-
-                        }else {
+                        } else {
                             // console.log('inside else block 2'); // For Debugging
-                            customValue = editingPhotoOGBase64[customKey] || '';
+                            customValue = editingPhotoOGBase64[customKey] || "";
                         }
                     }
 
@@ -2703,9 +2902,8 @@
                     data.customData[customKey] = {
                         label: labelText,
                         type: input.dataset.dataType,
-                        customValue: customValue
+                        customValue: customValue,
                     };
-                    
                 }
                 // console.log(data); // For Debugging
 
@@ -2716,7 +2914,8 @@
 
                 try {
                     if (docId) {
-                        await db.collection(collectionName).doc(docId).update(data);
+                        // await db.collection(collectionName).doc(docId).update(data);
+                        await db.collection(collectionName).doc(docId).set(data);
                         // showInfoModal("Entry updated successfully!");
                         const notificationMessage = "Entry updated successfully!";
                         activatePopupNotification(notificationMessage, undefined, notificationTimeout);
@@ -2756,11 +2955,12 @@
                 document.body.appendChild(container);
 
                 // 2. Create Floating Action Button (FAB)
-                const fab = document.createElement('button');
-                fab.id = 'html-console-fab';
+                const fab = document.createElement("button");
+                fab.id = "html-console-fab";
                 // fab.textContent = '>_';
-                fab.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H160v400Zm140-40-56-56 103-104-104-104 57-56 160 160-160 160Zm180 0v-80h240v80H480Z"/></svg>'
-                fab.setAttribute('aria-label', 'Toggle Console');
+                fab.innerHTML =
+                    '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H160v400Zm140-40-56-56 103-104-104-104 57-56 160 160-160 160Zm180 0v-80h240v80H480Z"/></svg>';
+                fab.setAttribute("aria-label", "Toggle Console");
                 document.body.appendChild(fab);
 
                 // 3. Position FAB & Toggle Controls
@@ -2770,11 +2970,11 @@
                 }; */
 
                 const toggleConsole = () => {
-                    container.classList.toggle('console-hidden');
+                    container.classList.toggle("console-hidden");
                     // updateFabPosition();
                 };
 
-                fab.addEventListener('click', toggleConsole);
+                fab.addEventListener("click", toggleConsole);
                 // updateFabPosition();
 
                 // 4. Dynamic Height Resizing
@@ -2830,7 +3030,6 @@
                     };
                 });
             }
-        
         </script>
     </body>
 </html>
