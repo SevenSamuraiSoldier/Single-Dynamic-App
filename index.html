@@ -1180,7 +1180,7 @@
             //////////////////////////////////////////////////////////////////////////////////////
 
             /* const keywordForFavorites = "fav"; */
-            const versionNumber = 6.3;
+            const versionNumber = 6.4;
             const versionFlashTime = 1000; // in ms (1000 ms = 1 sec)
 
             // console.log("Collection Name: " + collectionName);
@@ -2238,6 +2238,17 @@
                 }
             }
 
+            // Added in v_6.4 -- To avoid HTML rendering of the text data containg JS code
+            const escapeHTML = (str) => {
+                if (typeof str !== 'string') return str;
+                return str
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            };
+
             function dynamicallyRenderCards(data, doc, dataMap) {
                 let cardButtons = "";
                 let cardDetails = "";
@@ -2341,7 +2352,7 @@
                         <div class="card-detail">
                             <details>
                                 <summary>${config.text}</summary>
-                                <p  id="${key}">${data[key]} ${suffix}</p>
+                                <p id="${key}">${escapeHTML(data[key])} ${suffix}</p>
                             </details>
                         </div>
 
