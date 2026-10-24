@@ -6,6 +6,7 @@
         <title id="app-title"></title>
         <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
         <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-auth-compat.js"></script>
 
         <!-- 4. Read-only Mode Detector (Place here!) -->
         <script>
@@ -1064,6 +1065,7 @@
     </head>
     <body>
         <div class="master-div">
+            
             <!-- Main Content Container -->
             <div id="notification-container">
                 <div id="notification-popup" class="notification-popup">Notified!!</div>
@@ -1159,6 +1161,7 @@
             <div class="app-selection-panel hidden" id="app-selection-panel">
                 <div class="form-group" id="app-selection-form-group">
                     <h1>App Selection Menu</h1>
+                    <p id="debug-uid" style="color: rgb(253, 253, 253);">Device ID:</p>
                     <label for="collectionSelect" id="label-dropdown">Firestore Collection Name</label>
                     <select id="collectionSelect">
                         <option value="">Loading...</option>
@@ -1180,7 +1183,7 @@
             //////////////////////////////////////////////////////////////////////////////////////
 
             /* const keywordForFavorites = "fav"; */
-            const versionNumber = 6.4;
+            const versionNumber = 6.5;
             const versionFlashTime = 1000; // in ms (1000 ms = 1 sec)
 
             // console.log("Collection Name: " + collectionName);
@@ -1217,6 +1220,32 @@
             // Initialize Firebase
             app = firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
+
+            // Added in v_6.5
+            auth = firebase.auth(); // Initialize Auth
+            
+            // Added in v_6.5
+            // Automatically sign in anonymously on load
+            auth.signInAnonymously()
+                .then(() => {
+                    console.log("Signed in anonymously successfully.");
+                })
+                .catch((error) => {
+                    console.error("Auth error:", error.code, error.message);
+                });
+            
+            // Added in v_6.5
+            // Run this to print your device UID to the console (copy this for your Firestore rules)
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    console.log("My Device UID:", user.uid);
+                    // Temporarily show it on the phone screen
+                    const debugElement = document.getElementById("debug-uid");
+                    if (debugElement) {
+                        debugElement.innerText = "Device UID: " + user.uid;
+                    }
+                }
+            });
 
             // APP Selection Related Variables
             const appsCollectionName = "dataMap Collection";
